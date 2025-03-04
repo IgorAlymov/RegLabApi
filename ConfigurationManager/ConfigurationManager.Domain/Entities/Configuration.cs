@@ -6,6 +6,6 @@ public class Configuration : BaseEntity
     public Guid UserId { get; set; }
     public string Description { get; set; } = "";
     public Guid CurrentVersionId { get; set; }
-    public BaseConfigurationVersion? CurrentConfigurationVersion { get; set; }
-    public List<BaseConfigurationVersion> ConfigurationVersions { get; set; } = [];
+    public ConfigurationVersion? CurrentConfigurationVersion { get; set; }
+    public List<ConfigurationVersion> ConfigurationVersions { get; set; } = [];
 }

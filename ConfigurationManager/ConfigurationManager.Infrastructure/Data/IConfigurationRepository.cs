@@ -12,8 +12,8 @@ public interface IConfigurationRepository
     void Remove(Configuration configuration);
     Task<bool> ExistsAsync(Guid userId, string name);
 
-    Task<BaseConfigurationVersion?> GetVersionByIdAsync(Guid versionId);
-    Task<BaseConfigurationVersion?> GetVersionByIdAsync(Guid configurationId, Guid versionId, Guid userId);
+    Task<ConfigurationVersion?> GetVersionByIdAsync(Guid versionId);
+    Task<ConfigurationVersion?> GetVersionByIdAsync(Guid configurationId, Guid versionId, Guid userId);
 
     Task SaveChangesAsync();
 

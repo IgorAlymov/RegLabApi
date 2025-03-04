@@ -41,7 +41,16 @@ public class ConfigurationService(
             DateUpdated = DateTime.UtcNow
         };
 
-        // TODO: реализоват добавление версии
+        // Create Initial Version
+        var initialVersion = new ConfigurationVersion
+        {
+            ConfigurationId = configuration.Id,
+            Data = JsonSerializer.Serialize(createDto.Data), // Serialize to JSON
+        };
+
+        configuration.ConfigurationVersions.Add(initialVersion);
+        configuration.CurrentVersionId = initialVersion.Id; //Set current Version
+        configuration.CurrentConfigurationVersion = initialVersion; // Set current Version relation
 
         await configurationRepository.AddAsync(configuration);
         await configurationRepository.SaveChangesAsync();
@@ -58,9 +67,16 @@ public class ConfigurationService(
             throw new KeyNotFoundException("Configuration not found.");
         }
 
-        // TODO: реализоват добавление версии
+        // Create New Version
+        var newVersion = new ConfigurationVersion
+        {
+            ConfigurationId = configuration.Id,
+            Data = JsonSerializer.Serialize(updateDto.Data), // Serialize to JSON
+        };
 
+        configuration.ConfigurationVersions.Add(newVersion);
         configuration.DateUpdated = DateTime.UtcNow;
+        configuration.CurrentVersionId = newVersion.Id;
 
         configurationRepository.Update(configuration);
         await configurationRepository.SaveChangesAsync();
@@ -104,6 +120,9 @@ public class ConfigurationService(
         {
             Name = configuration.Name,
             Description = configuration.Description,
+            Data = configuration.CurrentConfigurationVersion?.Data != null
+                ? JsonSerializer.Deserialize<object>(configuration.CurrentConfigurationVersion.Data)
+                : null, // Deserialize the JSON
             CurrentVersionId = configuration.CurrentVersionId
         };
     }

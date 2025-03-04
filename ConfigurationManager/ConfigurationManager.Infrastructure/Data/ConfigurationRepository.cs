@@ -53,12 +53,12 @@ public class ConfigurationRepository(ConfigurationDbContext context) : IConfigur
         return await context.Configurations.AnyAsync(c => c.UserId == userId && c.Name == name);
     }
 
-    public async Task<BaseConfigurationVersion?> GetVersionByIdAsync(Guid versionId)
+    public async Task<ConfigurationVersion?> GetVersionByIdAsync(Guid versionId)
     {
         return await context.ConfigurationVersions.FindAsync(versionId);
     }
 
-    public async Task<BaseConfigurationVersion?> GetVersionByIdAsync(Guid configurationId, Guid versionId, Guid userId)
+    public async Task<ConfigurationVersion?> GetVersionByIdAsync(Guid configurationId, Guid versionId, Guid userId)
     {
         var configuration =
             await context.Configurations.FirstOrDefaultAsync(c => c.Id == configurationId && c.UserId == userId);

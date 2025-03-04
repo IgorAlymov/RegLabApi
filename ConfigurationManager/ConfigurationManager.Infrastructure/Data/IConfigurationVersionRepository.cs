@@ -4,9 +4,9 @@ namespace ConfigurationManager.ConfigurationManager.Infrastructure.Data;
 
 public interface IConfigurationVersionRepository
 {
-    Task<BaseConfigurationVersion?> GetByIdAsync(Guid id);
-    Task AddAsync(BaseConfigurationVersion configurationVersion);
-    void Update(BaseConfigurationVersion configurationVersion);
-    void Remove(BaseConfigurationVersion configurationVersion);
+    Task<ConfigurationVersion?> GetByIdAsync(Guid id);
+    Task AddAsync(ConfigurationVersion configurationVersion);
+    void Update(ConfigurationVersion configurationVersion);
+    void Remove(ConfigurationVersion configurationVersion);
     Task SaveChangesAsync();
 }
