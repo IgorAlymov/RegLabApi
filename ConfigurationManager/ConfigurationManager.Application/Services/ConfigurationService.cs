@@ -1,20 +1,19 @@
 ﻿using System.Text.Json;
 using ConfigurationManager.ConfigurationManager.API.Models;
 using ConfigurationManager.ConfigurationManager.Domain.Entities;
-using ConfigurationManager.ConfigurationManager.Infrastructure.Data;
+using ConfigurationManager.ConfigurationManager.Infrastructure.Data.Repositories;
 
 namespace ConfigurationManager.ConfigurationManager.Application.Services;
 
 public class ConfigurationService(
-    IConfigurationRepository configurationRepository,
-    IConfigurationVersionRepository configurationVersionRepository)
+    IConfigurationRepository<Configuration> configurationRepository,
+    IRepository<ConfigurationVersion> configurationVersionRepository)
     : IConfigurationService
 {
     public async Task<List<ConfigurationDto>> GetAllConfigurationsAsync(Guid userId, string? nameFilter = null,
         DateTime? createdAfter = null)
     {
         var configurations = await configurationRepository.GetAllAsync(userId, nameFilter, createdAfter);
-
         return configurations.Select(ToDto).ToList();
     }
 
@@ -44,8 +43,7 @@ public class ConfigurationService(
         // Create Initial Version
         var initialVersion = new ConfigurationVersion
         {
-            ConfigurationId = configuration.Id,
-            Data = JsonSerializer.Serialize(createDto.Data), // Serialize to JSON
+            ConfigurationId = configuration.Id, Data = JsonSerializer.Serialize(createDto.Data), // Serialize to JSON
         };
 
         configuration.ConfigurationVersions.Add(initialVersion);
@@ -53,7 +51,6 @@ public class ConfigurationService(
         configuration.CurrentConfigurationVersion = initialVersion; // Set current Version relation
 
         await configurationRepository.AddAsync(configuration);
-        await configurationRepository.SaveChangesAsync();
 
         return ToDto(configuration);
     }
@@ -70,17 +67,14 @@ public class ConfigurationService(
         // Create New Version
         var newVersion = new ConfigurationVersion
         {
-            ConfigurationId = configuration.Id,
-            Data = JsonSerializer.Serialize(updateDto.Data), // Serialize to JSON
+            ConfigurationId = configuration.Id, Data = JsonSerializer.Serialize(updateDto.Data), // Serialize to JSON
         };
 
         configuration.ConfigurationVersions.Add(newVersion);
         configuration.DateUpdated = DateTime.UtcNow;
         configuration.CurrentVersionId = newVersion.Id;
 
-        configurationRepository.Update(configuration);
-        await configurationRepository.SaveChangesAsync();
-
+        await configurationRepository.UpdateAsync(configuration);
         return ToDto(configuration);
     }
 
@@ -93,7 +87,7 @@ public class ConfigurationService(
             throw new KeyNotFoundException("Configuration not found.");
         }
 
-        var version = await configurationRepository.GetVersionByIdAsync(configurationId, versionId, userId);
+        var version = await configurationVersionRepository.GetByIdAsync(versionId);
         if (version == null)
         {
             throw new KeyNotFoundException("Configuration version not found.");
@@ -110,8 +104,7 @@ public class ConfigurationService(
             throw new KeyNotFoundException("Configuration not found.");
         }
 
-        configurationRepository.Remove(configuration);
-        await configurationRepository.SaveChangesAsync();
+        await configurationRepository.DeleteAsync(id);
     }
 
     private ConfigurationDto ToDto(Configuration configuration)

@@ -24,7 +24,7 @@ public class ConfigurationDbContext(DbContextOptions<ConfigurationDbContext> opt
             .HasOne(c => c.CurrentConfigurationVersion)
             .WithOne()
             .HasForeignKey<Configuration>(c => c.CurrentVersionId)
-            .OnDelete(DeleteBehavior.Restrict); // Prevent deleting version that's in use
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Configuration>()
             .Navigation(e => e.CurrentConfigurationVersion)
