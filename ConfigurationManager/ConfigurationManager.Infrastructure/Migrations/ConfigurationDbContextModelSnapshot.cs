@@ -56,7 +56,7 @@ namespace ConfigurationManager.Migrations
                     b.HasIndex("Name", "UserId")
                         .IsUnique();
 
-                    b.ToTable("Configurations");
+                    b.ToTable("Configurations", (string)null);
                 });
 
             modelBuilder.Entity("ConfigurationManager.ConfigurationManager.Domain.Entities.ConfigurationVersion", b =>
@@ -82,7 +82,7 @@ namespace ConfigurationManager.Migrations
 
                     b.HasIndex("ConfigurationId");
 
-                    b.ToTable("ConfigurationVersions");
+                    b.ToTable("ConfigurationVersions", (string)null);
                 });
 
             modelBuilder.Entity("ConfigurationManager.ConfigurationManager.Domain.Entities.Configuration", b =>
