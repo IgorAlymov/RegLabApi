@@ -73,7 +73,7 @@ public class ConfigurationService(
             configuration.CurrentVersionId = configurationUpdateDto.ConfigurationVersionId.Value;
         }
 
-        if (configurationUpdateDto.Data != null)
+        if (!string.IsNullOrEmpty(configurationUpdateDto.Data))
         {
             var newVersion = configurationUpdateDto.ToConfigurationVersionEntity(configuration.Id);
             await configurationVersionRepository.AddAsync(newVersion);
