@@ -32,24 +32,20 @@ public class ConfigurationService(
 
         var configuration = new Configuration
         {
-            Id = Guid.NewGuid(),
             UserId = configurationCreateDto.UserId,
             Name = configurationCreateDto.Name,
-            Description = configurationCreateDto.Description,
-            DateAdded = DateTime.UtcNow,
-            DateUpdated = DateTime.UtcNow
+            Description = configurationCreateDto.Description
         };
 
-        // Create Initial Version
         var initialVersion = new ConfigurationVersion
         {
             ConfigurationId = configuration.Id,
-            Data = JsonSerializer.Serialize(configurationCreateDto.Data), // Serialize to JSON
+            Data = JsonSerializer.Serialize(configurationCreateDto.Data)
         };
 
         configuration.ConfigurationVersions.Add(initialVersion);
-        configuration.CurrentVersionId = initialVersion.Id; //Set current Version
-        configuration.CurrentConfigurationVersion = initialVersion; // Set current Version relation
+        configuration.CurrentVersionId = initialVersion.Id;
+        configuration.CurrentConfigurationVersion = initialVersion;
 
         await configurationRepository.AddAsync(configuration);
         return configuration.ToDto();
@@ -58,22 +54,26 @@ public class ConfigurationService(
     public async Task<ConfigurationDto> UpdateConfigurationAsync(ConfigurationUpdateDto configurationUpdateDto)
     {
         var configuration = await configurationRepository.GetByIdAsync(configurationUpdateDto.Id);
-
         if (configuration == null)
         {
             throw new KeyNotFoundException("Configuration not found.");
         }
 
-        // Create New Version
-        var newVersion = new ConfigurationVersion
-        {
-            ConfigurationId = configuration.Id,
-            Data = JsonSerializer.Serialize(configurationUpdateDto.Data), // Serialize to JSON
-        };
+        configuration.Name = configurationUpdateDto.Name;
+        configuration.Description = configurationUpdateDto.Description;
+        configuration.DateUpdated = DateTimeOffset.UtcNow;
 
-        configuration.ConfigurationVersions.Add(newVersion);
-        configuration.DateUpdated = DateTime.UtcNow;
-        configuration.CurrentVersionId = newVersion.Id;
+        if (configurationUpdateDto.Data != null)
+        {
+            var newVersion = new ConfigurationVersion
+            {
+                ConfigurationId = configuration.Id, Data = JsonSerializer.Serialize(configurationUpdateDto.Data)
+            };
+
+            configuration.ConfigurationVersions.Add(newVersion);
+            configuration.CurrentVersionId = newVersion.Id;
+            configuration.CurrentConfigurationVersion = newVersion;
+        }
 
         await configurationRepository.UpdateAsync(configuration);
         return configuration.ToDto();
