@@ -19,7 +19,6 @@ namespace ConfigurationManager.Migrations
                     Name = table.Column<string>(type: "text", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
-                    CurrentVersionId = table.Column<Guid>(type: "uuid", nullable: false),
                     DateAdded = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     DateUpdated = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
@@ -52,8 +51,7 @@ namespace ConfigurationManager.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_ConfigurationVersions_ConfigurationId",
                 table: "ConfigurationVersions",
-                column: "ConfigurationId",
-                unique: true);
+                column: "ConfigurationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Configurations_Name_UserId",

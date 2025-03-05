@@ -28,9 +28,6 @@ namespace ConfigurationManager.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CurrentVersionId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTimeOffset>("DateAdded")
                         .HasColumnType("timestamp with time zone");
 
@@ -77,8 +74,7 @@ namespace ConfigurationManager.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ConfigurationId")
-                        .IsUnique();
+                    b.HasIndex("ConfigurationId");
 
                     b.ToTable("ConfigurationVersions");
                 });
@@ -86,15 +82,15 @@ namespace ConfigurationManager.Migrations
             modelBuilder.Entity("ConfigurationManager.ConfigurationManager.Domain.Entities.ConfigurationVersion", b =>
                 {
                     b.HasOne("ConfigurationManager.ConfigurationManager.Domain.Entities.Configuration", null)
-                        .WithOne("CurrentConfigurationVersion")
-                        .HasForeignKey("ConfigurationManager.ConfigurationManager.Domain.Entities.ConfigurationVersion", "ConfigurationId")
+                        .WithMany("ConfigurationVersions")
+                        .HasForeignKey("ConfigurationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
             modelBuilder.Entity("ConfigurationManager.ConfigurationManager.Domain.Entities.Configuration", b =>
                 {
-                    b.Navigation("CurrentConfigurationVersion");
+                    b.Navigation("ConfigurationVersions");
                 });
 #pragma warning restore 612, 618
         }
