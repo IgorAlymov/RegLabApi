@@ -21,11 +21,11 @@ public class ConfigurationDbContext(DbContextOptions<ConfigurationDbContext> opt
             .HasValue<FontsConfigurationVersion>(ConfigurationType.Fonts);
 
         modelBuilder.RegisterJsonConversion<ColorSchemesConfigurationVersion, ConfigurationDataColorSchemes>(
-            сonfigurationVersion => сonfigurationVersion.ConfigurationData,
+            configurationVersion => configurationVersion.ConfigurationData,
             nameof(ColorSchemesConfigurationVersion.ConfigurationData));
 
         modelBuilder.RegisterJsonConversion<FontsConfigurationVersion, ConfigurationDataFonts>(
-            сonfigurationVersion => сonfigurationVersion.ConfigurationData,
+            configurationVersion => configurationVersion.ConfigurationData,
             nameof(FontsConfigurationVersion.ConfigurationData));
 
         base.OnModelCreating(modelBuilder);
