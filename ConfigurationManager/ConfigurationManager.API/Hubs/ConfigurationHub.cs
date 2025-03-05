@@ -1,9 +1,13 @@
-﻿using ConfigurationManager.ConfigurationManager.API.Models;
+﻿using ConfigurationManager.ConfigurationManager.Domain.Events;
+using MediatR;
 using Microsoft.AspNetCore.SignalR;
 
 namespace ConfigurationManager.ConfigurationManager.API.Hubs;
 
-public class ConfigurationHub(ILogger<ConfigurationHub> logger) : Hub
+public class ConfigurationHub(ILogger<ConfigurationHub> logger) : Hub,
+    INotificationHandler<ConfigurationCreatedEvent>,
+    INotificationHandler<ConfigurationUpdatedEvent>,
+    INotificationHandler<ConfigurationDeletedEvent>
 {
     public override async Task OnConnectedAsync()
     {
@@ -18,24 +22,6 @@ public class ConfigurationHub(ILogger<ConfigurationHub> logger) : Hub
         await base.OnDisconnectedAsync(exception);
     }
 
-    public async Task SendConfigurationCreatedAsync(ConfigurationDto configuration)
-    {
-        logger.LogInformation($"Sending ConfigurationCreated notification for ConfigurationId: {configuration.Id}");
-        await Clients.All.SendAsync("ReceiveConfigurationCreated", configuration);
-    }
-
-    public async Task SendConfigurationUpdatedAsync(ConfigurationDto configuration)
-    {
-        logger.LogInformation($"Sending ConfigurationUpdated notification for ConfigurationId: {configuration.Id}");
-        await Clients.All.SendAsync("ReceiveConfigurationUpdated", configuration);
-    }
-
-    public async Task SendConfigurationDeleted(Guid configurationId)
-    {
-        logger.LogInformation($"Sending ConfigurationDeleted notification for ConfigurationId: {configurationId}");
-        await Clients.All.SendAsync("ReceiveConfigurationDeleted", configurationId);
-    }
-
     private Guid GetUserIdFromContext()
     {
         var userIdString = Context.GetHttpContext()?.Request.Query["userId"];
@@ -45,5 +31,26 @@ public class ConfigurationHub(ILogger<ConfigurationHub> logger) : Hub
         }
 
         throw new Exception("Unable to determine User ID");
+    }
+
+    public async Task Handle(ConfigurationCreatedEvent notification, CancellationToken cancellationToken)
+    {
+        logger.LogInformation(
+            $"Sending ConfigurationCreated notification for ConfigurationId: {notification.Configuration.Id}");
+        await Clients.All.SendAsync("ReceiveConfigurationCreated", notification.Configuration);
+    }
+
+    public async Task Handle(ConfigurationUpdatedEvent notification, CancellationToken cancellationToken)
+    {
+        logger.LogInformation(
+            $"Sending ConfigurationUpdated notification for ConfigurationId: {notification.Configuration.Id}");
+        await Clients.All.SendAsync("ReceiveConfigurationUpdated", notification.Configuration);
+    }
+
+    public async Task Handle(ConfigurationDeletedEvent notification, CancellationToken cancellationToken)
+    {
+        logger.LogInformation(
+            $"Sending ConfigurationDeleted notification for ConfigurationId: {notification.ConfigurationId}");
+        await Clients.All.SendAsync("ReceiveConfigurationDeleted", notification.ConfigurationId);
     }
 }

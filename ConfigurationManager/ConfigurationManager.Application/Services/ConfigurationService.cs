@@ -1,12 +1,15 @@
 ﻿using ConfigurationManager.ConfigurationManager.API.Models;
 using ConfigurationManager.ConfigurationManager.Domain.Entities;
+using ConfigurationManager.ConfigurationManager.Domain.Events;
 using ConfigurationManager.ConfigurationManager.Infrastructure.Data.Repositories;
+using MediatR;
 
 namespace ConfigurationManager.ConfigurationManager.Application.Services;
 
 public class ConfigurationService(
     IConfigurationRepository<Configuration> configurationRepository,
-    IRepository<BaseConfigurationVersion> configurationVersionRepository)
+    IRepository<BaseConfigurationVersion> configurationVersionRepository,
+    IPublisher mediator)
     : IConfigurationService
 {
     public async Task<List<ConfigurationDto>> GetAllConfigurationsAsync(Guid? userId = null, string? nameFilter = null,
@@ -41,10 +44,13 @@ public class ConfigurationService(
 
         await configurationRepository.AddAsync(configuration);
         await configurationVersionRepository.AddAsync(initialVersion);
+
+        await mediator.Publish(new ConfigurationCreatedEvent(configuration.ToDto()));
         return configuration.ToDto();
     }
 
-    public async Task<ConfigurationDto> UpdateConfigurationAsync(Guid configurationId, ConfigurationUpdateDto configurationUpdateDto)
+    public async Task<ConfigurationDto> UpdateConfigurationAsync(Guid configurationId,
+        ConfigurationUpdateDto configurationUpdateDto)
     {
         var configuration = await configurationRepository.GetByIdAsync(configurationId);
         if (configuration == null)
@@ -69,6 +75,7 @@ public class ConfigurationService(
         }
 
         await configurationRepository.UpdateAsync(configuration);
+        await mediator.Publish(new ConfigurationUpdatedEvent(configuration.ToDto()));
         return configuration.ToDto();
     }
 
@@ -94,5 +101,6 @@ public class ConfigurationService(
         }
 
         await configurationRepository.DeleteAsync(id);
+        await mediator.Publish(new ConfigurationDeletedEvent(id));
     }
 }

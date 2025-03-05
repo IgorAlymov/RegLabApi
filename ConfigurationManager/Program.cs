@@ -3,6 +3,7 @@ using ConfigurationManager.ConfigurationManager.Application.Services;
 using ConfigurationManager.ConfigurationManager.Domain.Entities;
 using ConfigurationManager.ConfigurationManager.Infrastructure.Data;
 using ConfigurationManager.ConfigurationManager.Infrastructure.Data.Repositories;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +31,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddMediatR(typeof(ConfigurationHub).Assembly);
 builder.Services.AddSignalR();
 
 var app = builder.Build();
