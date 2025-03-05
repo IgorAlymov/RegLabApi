@@ -3,5 +3,5 @@
 public class ConfigurationVersionDto
 {
     public Guid Id { get; set; }
-    public object? Data { get; set; }
+    public string Data { get; set; } = "";
 }

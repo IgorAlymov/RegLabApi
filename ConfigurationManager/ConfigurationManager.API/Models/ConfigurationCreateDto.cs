@@ -1,9 +1,18 @@
-﻿namespace ConfigurationManager.ConfigurationManager.API.Models;
+﻿using ConfigurationManager.ConfigurationManager.Domain.Entities;
 
-public class ConfigurationCreateDto
+namespace ConfigurationManager.ConfigurationManager.API.Models;
+
+public class ConfigurationCreateDto : IConfigurationOperation
 {
     public string Name { get; set; } = "";
     public string Description { get; set; } = "";
-    public object Data { get; set; }
+    public ConfigurationType ConfigurationType { get; set; }
+    public string Data { get; set; } = "";
     public Guid UserId { get; set; }
+}
+
+public interface IConfigurationOperation
+{
+    public string Data { get; set; }
+    public ConfigurationType ConfigurationType { get; set; }
 }

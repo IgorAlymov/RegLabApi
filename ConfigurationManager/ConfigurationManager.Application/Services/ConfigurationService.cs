@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using ConfigurationManager.ConfigurationManager.API.Models;
+﻿using ConfigurationManager.ConfigurationManager.API.Models;
 using ConfigurationManager.ConfigurationManager.Domain.Entities;
 using ConfigurationManager.ConfigurationManager.Infrastructure.Data.Repositories;
 
@@ -7,7 +6,7 @@ namespace ConfigurationManager.ConfigurationManager.Application.Services;
 
 public class ConfigurationService(
     IConfigurationRepository<Configuration> configurationRepository,
-    IRepository<ConfigurationVersion> configurationVersionRepository)
+    IRepository<BaseConfigurationVersion> configurationVersionRepository)
     : IConfigurationService
 {
     public async Task<List<ConfigurationDto>> GetAllConfigurationsAsync(Guid? userId = null, string? nameFilter = null,
@@ -37,11 +36,7 @@ public class ConfigurationService(
             Description = configurationCreateDto.Description
         };
 
-        var initialVersion = new ConfigurationVersion
-        {
-            ConfigurationId = configuration.Id,
-            Data = JsonSerializer.Serialize(configurationCreateDto.Data)
-        };
+        var initialVersion = configurationCreateDto.ToConfigurationVersionEntity(configuration.Id);
         configuration.CurrentVersionId = initialVersion.Id;
 
         await configurationRepository.AddAsync(configuration);
@@ -68,11 +63,7 @@ public class ConfigurationService(
 
         if (configurationUpdateDto.Data != null)
         {
-            var newVersion = new ConfigurationVersion
-            {
-                ConfigurationId = configuration.Id, Data = JsonSerializer.Serialize(configurationUpdateDto.Data)
-            };
-
+            var newVersion = configurationUpdateDto.ToConfigurationVersionEntity(configuration.Id);
             await configurationVersionRepository.AddAsync(newVersion);
             configuration.CurrentVersionId = newVersion.Id;
         }

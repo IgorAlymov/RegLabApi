@@ -43,7 +43,7 @@ public class ConfigurationsController(IConfigurationService configurationService
     }
 
     [HttpPost]
-    public async Task<ActionResult<ConfigurationDto>> CreateConfiguration(ConfigurationCreateDto createDto)
+    public async Task<ActionResult<ConfigurationDto>> CreateConfiguration([FromBody] ConfigurationCreateDto createDto)
     {
         try
         {

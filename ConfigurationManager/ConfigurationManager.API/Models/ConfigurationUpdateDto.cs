@@ -1,9 +1,12 @@
-﻿namespace ConfigurationManager.ConfigurationManager.API.Models;
+﻿using ConfigurationManager.ConfigurationManager.Domain.Entities;
 
-public class ConfigurationUpdateDto
+namespace ConfigurationManager.ConfigurationManager.API.Models;
+
+public class ConfigurationUpdateDto : IConfigurationOperation
 {
     public string Name { get; set; } = "";
     public string Description { get; set; } = "";
-    public object? Data { get; set; }
+    public string? Data { get; set; } = "";
     public Guid? ConfigurationVersionId { get; set; }
+    public ConfigurationType ConfigurationType { get; set; }
 }

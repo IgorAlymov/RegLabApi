@@ -13,16 +13,13 @@ builder.Services.AddDbContext<ConfigurationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IConfigurationRepository<Configuration>, ConfigurationRepository>();
-builder.Services.AddScoped<IRepository<ConfigurationVersion>, ConfigurationVersionRepository>();
+builder.Services.AddScoped<IRepository<BaseConfigurationVersion>, ConfigurationVersionRepository>();
 builder.Services.AddScoped<IConfigurationService, ConfigurationService>();
 
 builder.Services.AddSignalR();
 
 
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.WriteIndented = true;
-});
+builder.Services.AddControllers().AddNewtonsoftJson();
 
 var app = builder.Build();
 

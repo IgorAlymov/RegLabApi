@@ -3,22 +3,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ConfigurationManager.ConfigurationManager.Infrastructure.Data.Repositories;
 
-public class ConfigurationVersionRepository(ConfigurationDbContext context) : IRepository<ConfigurationVersion>
+public class ConfigurationVersionRepository(ConfigurationDbContext context) : IRepository<BaseConfigurationVersion>
 {
-    public async Task<ConfigurationVersion?> GetByIdAsync(Guid id, CancellationToken token = default) =>
+    public async Task<BaseConfigurationVersion?> GetByIdAsync(Guid id, CancellationToken token = default) =>
         await context.ConfigurationVersions.FindAsync([id], cancellationToken: token);
 
-    public async Task<IEnumerable<ConfigurationVersion>> GetAllAsync(CancellationToken token = default) =>
+    public async Task<IEnumerable<BaseConfigurationVersion>> GetAllAsync(CancellationToken token = default) =>
         await context.ConfigurationVersions.ToListAsync(cancellationToken: token);
 
-    public async Task<ConfigurationVersion> AddAsync(ConfigurationVersion entity, CancellationToken token = default)
+    public async Task<BaseConfigurationVersion> AddAsync(BaseConfigurationVersion entity, CancellationToken token = default)
     {
         context.ConfigurationVersions.Add(entity);
         await context.SaveChangesAsync(token);
         return entity;
     }
 
-    public async Task UpdateAsync(ConfigurationVersion entity, CancellationToken token = default)
+    public async Task UpdateAsync(BaseConfigurationVersion entity, CancellationToken token = default)
     {
         context.ConfigurationVersions.Update(entity);
         await context.SaveChangesAsync(token);
