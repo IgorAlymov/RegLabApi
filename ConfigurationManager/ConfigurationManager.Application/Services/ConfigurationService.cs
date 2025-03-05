@@ -61,6 +61,11 @@ public class ConfigurationService(
         configuration.Description = configurationUpdateDto.Description;
         configuration.DateUpdated = DateTimeOffset.UtcNow;
 
+        if (configurationUpdateDto.ConfigurationVersionId != null)
+        {
+            configuration.CurrentVersionId = configurationUpdateDto.ConfigurationVersionId.Value;
+        }
+
         if (configurationUpdateDto.Data != null)
         {
             var newVersion = new ConfigurationVersion
@@ -68,8 +73,8 @@ public class ConfigurationService(
                 ConfigurationId = configuration.Id, Data = JsonSerializer.Serialize(configurationUpdateDto.Data)
             };
 
+            await configurationVersionRepository.AddAsync(newVersion);
             configuration.CurrentVersionId = newVersion.Id;
-            configuration.CurrentConfigurationVersion = newVersion;
         }
 
         await configurationRepository.UpdateAsync(configuration);
