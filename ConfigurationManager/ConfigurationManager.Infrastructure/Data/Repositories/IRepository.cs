@@ -13,7 +13,6 @@ public interface IRepository<T> where T : BaseEntity
 
 public interface IConfigurationRepository<T> : IRepository<T> where T : BaseEntity
 {
-    Task<IEnumerable<T>> GetAllAsync(Guid userId, string? nameFilter = null, DateTime? createdAfter = null);
+    Task<IEnumerable<T>> GetAllAsync(Guid? userId = null, string? nameFilter = null, DateTime? createdAfter = null);
     Task<bool> ExistsAsync(Guid userId, string name);
-    Task<T?> GetByIdAsync(Guid id, Guid userId);
 }

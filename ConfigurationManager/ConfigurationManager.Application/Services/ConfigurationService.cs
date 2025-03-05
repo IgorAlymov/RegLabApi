@@ -10,22 +10,22 @@ public class ConfigurationService(
     IRepository<ConfigurationVersion> configurationVersionRepository)
     : IConfigurationService
 {
-    public async Task<List<ConfigurationDto>> GetAllConfigurationsAsync(Guid userId, string? nameFilter = null,
+    public async Task<List<ConfigurationDto>> GetAllConfigurationsAsync(Guid? userId = null, string? nameFilter = null,
         DateTime? createdAfter = null)
     {
         var configurations = await configurationRepository.GetAllAsync(userId, nameFilter, createdAfter);
-        return configurations.Select(ToDto).ToList();
+        return configurations.Select(configuration => configuration.ToDto()).ToList();
     }
 
-    public async Task<ConfigurationDto?> GetConfigurationByIdAsync(Guid id, Guid userId)
+    public async Task<ConfigurationDto?> GetConfigurationByIdAsync(Guid id)
     {
-        var configuration = await configurationRepository.GetByIdAsync(id, userId);
-        return configuration == null ? null : ToDto(configuration);
+        var configuration = await configurationRepository.GetByIdAsync(id);
+        return configuration?.ToDto();
     }
 
-    public async Task<ConfigurationDto> CreateConfigurationAsync(Guid userId, ConfigurationCreateDto createDto)
+    public async Task<ConfigurationDto> CreateConfigurationAsync(ConfigurationCreateDto configurationCreateDto)
     {
-        if (await configurationRepository.ExistsAsync(userId, createDto.Name))
+        if (await configurationRepository.ExistsAsync(configurationCreateDto.UserId, configurationCreateDto.Name))
         {
             throw new InvalidOperationException("Configuration with this name already exists for this user.");
         }
@@ -33,9 +33,9 @@ public class ConfigurationService(
         var configuration = new Configuration
         {
             Id = Guid.NewGuid(),
-            UserId = userId,
-            Name = createDto.Name,
-            Description = createDto.Description,
+            UserId = configurationCreateDto.UserId,
+            Name = configurationCreateDto.Name,
+            Description = configurationCreateDto.Description,
             DateAdded = DateTime.UtcNow,
             DateUpdated = DateTime.UtcNow
         };
@@ -43,7 +43,8 @@ public class ConfigurationService(
         // Create Initial Version
         var initialVersion = new ConfigurationVersion
         {
-            ConfigurationId = configuration.Id, Data = JsonSerializer.Serialize(createDto.Data), // Serialize to JSON
+            ConfigurationId = configuration.Id,
+            Data = JsonSerializer.Serialize(configurationCreateDto.Data), // Serialize to JSON
         };
 
         configuration.ConfigurationVersions.Add(initialVersion);
@@ -51,13 +52,12 @@ public class ConfigurationService(
         configuration.CurrentConfigurationVersion = initialVersion; // Set current Version relation
 
         await configurationRepository.AddAsync(configuration);
-
-        return ToDto(configuration);
+        return configuration.ToDto();
     }
 
-    public async Task<ConfigurationDto> UpdateConfigurationAsync(Guid id, Guid userId, ConfigurationUpdateDto updateDto)
+    public async Task<ConfigurationDto> UpdateConfigurationAsync(ConfigurationUpdateDto configurationUpdateDto)
     {
-        var configuration = await configurationRepository.GetByIdAsync(id, userId);
+        var configuration = await configurationRepository.GetByIdAsync(configurationUpdateDto.Id);
 
         if (configuration == null)
         {
@@ -67,7 +67,8 @@ public class ConfigurationService(
         // Create New Version
         var newVersion = new ConfigurationVersion
         {
-            ConfigurationId = configuration.Id, Data = JsonSerializer.Serialize(updateDto.Data), // Serialize to JSON
+            ConfigurationId = configuration.Id,
+            Data = JsonSerializer.Serialize(configurationUpdateDto.Data), // Serialize to JSON
         };
 
         configuration.ConfigurationVersions.Add(newVersion);
@@ -75,48 +76,28 @@ public class ConfigurationService(
         configuration.CurrentVersionId = newVersion.Id;
 
         await configurationRepository.UpdateAsync(configuration);
-        return ToDto(configuration);
+        return configuration.ToDto();
     }
 
-    public async Task<ConfigurationDto> GetConfigurationVersionAsync(Guid configurationId, Guid versionId, Guid userId)
+    public async Task<ConfigurationVersionDto> GetConfigurationVersionAsync(Guid configurationVersionId)
     {
-        var configuration = await configurationRepository.GetByIdAsync(configurationId, userId);
-
-        if (configuration == null)
-        {
-            throw new KeyNotFoundException("Configuration not found.");
-        }
-
-        var version = await configurationVersionRepository.GetByIdAsync(versionId);
+        var version = await configurationVersionRepository.GetByIdAsync(configurationVersionId);
         if (version == null)
         {
             throw new KeyNotFoundException("Configuration version not found.");
         }
 
-        return ToDto(configuration);
+        return version.ToDto();
     }
 
-    public async Task DeleteConfigurationAsync(Guid id, Guid userId)
+    public async Task DeleteConfigurationAsync(Guid id)
     {
-        var configuration = await configurationRepository.GetByIdAsync(id, userId);
+        var configuration = await configurationRepository.GetByIdAsync(id);
         if (configuration == null)
         {
             throw new KeyNotFoundException("Configuration not found.");
         }
 
         await configurationRepository.DeleteAsync(id);
-    }
-
-    private ConfigurationDto ToDto(Configuration configuration)
-    {
-        return new ConfigurationDto
-        {
-            Name = configuration.Name,
-            Description = configuration.Description,
-            Data = configuration.CurrentConfigurationVersion?.Data != null
-                ? JsonSerializer.Deserialize<object>(configuration.CurrentConfigurationVersion.Data)
-                : null, // Deserialize the JSON
-            CurrentVersionId = configuration.CurrentVersionId
-        };
     }
 }

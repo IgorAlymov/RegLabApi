@@ -14,10 +14,14 @@ public class ConfigurationRepository(ConfigurationDbContext context) : IConfigur
     public async Task<Configuration?> GetByIdAsync(Guid id, Guid userId) =>
         await context.Configurations.FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
 
-    public async Task<IEnumerable<Configuration>> GetAllAsync(Guid userId, string? nameFilter = null,
+    public async Task<IEnumerable<Configuration>> GetAllAsync(Guid? userId = null, string? nameFilter = null,
         DateTime? createdAfter = null)
     {
-        var query = context.Configurations.Where(c => c.UserId == userId);
+        var query = context.Configurations.AsQueryable();
+        if (userId != null)
+        {
+            query = context.Configurations.Where(c => c.UserId == userId);
+        }
 
         if (!string.IsNullOrEmpty(nameFilter))
         {
