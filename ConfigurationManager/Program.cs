@@ -1,3 +1,4 @@
+using System.Reflection;
 using ConfigurationManager.ConfigurationManager.API.Hubs;
 using ConfigurationManager.ConfigurationManager.Application.Services;
 using ConfigurationManager.ConfigurationManager.Domain.Entities;
@@ -31,7 +32,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddMediatR(typeof(ConfigurationHub).Assembly);
+builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
 builder.Services.AddSignalR();
 
 var app = builder.Build();
