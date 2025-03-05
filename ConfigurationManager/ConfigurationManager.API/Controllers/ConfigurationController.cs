@@ -48,7 +48,13 @@ public class ConfigurationsController(IConfigurationService configurationService
         try
         {
             var configuration = await configurationService.CreateConfigurationAsync(createDto);
-            return CreatedAtAction(nameof(GetConfigurationById), new { id = configuration.Id }, configuration);
+            if (configuration.IsSuccess)
+            {
+                return CreatedAtAction(nameof(GetConfigurationById), new { id = configuration.Result.Id },
+                    configuration);
+            }
+
+            return BadRequest(configuration.ErrorMessage);
         }
         catch (InvalidOperationException ex)
         {

@@ -14,7 +14,7 @@ public static class ConfigurationExtensions
             Description = configuration.Description,
             CurrentVersionId = configuration.CurrentVersionId,
             CurrentConfigurationVersionDto = configuration.ConfigurationVersions
-                .First(version => version.Id == configuration.CurrentVersionId).ToDto()
+                .FirstOrDefault(version => version.Id == configuration.CurrentVersionId)?.ToDto()
         };
 
     public static ConfigurationVersionDto ToDto(this BaseConfigurationVersion configurationVersion) =>

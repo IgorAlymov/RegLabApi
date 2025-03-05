@@ -1,4 +1,5 @@
 ﻿using ConfigurationManager.ConfigurationManager.API.Models;
+using Sitko.Core.App.Results;
 
 namespace ConfigurationManager.ConfigurationManager.Application.Services;
 
@@ -8,7 +9,7 @@ public interface IConfigurationService
         DateTime? createdAfter = null);
 
     Task<ConfigurationDto?> GetConfigurationByIdAsync(Guid id);
-    Task<ConfigurationDto> CreateConfigurationAsync(ConfigurationCreateDto configurationCreateDto);
+    Task<OperationResult<ConfigurationDto>> CreateConfigurationAsync(ConfigurationCreateDto configurationCreateDto);
 
     Task<ConfigurationDto>
         UpdateConfigurationAsync(Guid configurationId, ConfigurationUpdateDto configurationUpdateDto);

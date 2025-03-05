@@ -3,15 +3,19 @@ using ConfigurationManager.ConfigurationManager.Domain.Entities;
 using ConfigurationManager.ConfigurationManager.Domain.Events;
 using ConfigurationManager.ConfigurationManager.Infrastructure.Data.Repositories;
 using MediatR;
+using Sitko.Core.App.Results;
 
 namespace ConfigurationManager.ConfigurationManager.Application.Services;
 
 public class ConfigurationService(
     IConfigurationRepository<Configuration> configurationRepository,
     IRepository<BaseConfigurationVersion> configurationVersionRepository,
-    IPublisher mediator)
+    IPublisher mediator,
+    ILogger<ConfigurationService> logger)
     : IConfigurationService
 {
+    private const string ConfigurationExistError = "\"Configuration with this name already exists for this user.\"";
+
     public async Task<List<ConfigurationDto>> GetAllConfigurationsAsync(Guid? userId = null, string? nameFilter = null,
         DateTime? createdAfter = null)
     {
@@ -25,11 +29,13 @@ public class ConfigurationService(
         return configuration?.ToDto();
     }
 
-    public async Task<ConfigurationDto> CreateConfigurationAsync(ConfigurationCreateDto configurationCreateDto)
+    public async Task<OperationResult<ConfigurationDto>> CreateConfigurationAsync(
+        ConfigurationCreateDto configurationCreateDto)
     {
         if (await configurationRepository.ExistsAsync(configurationCreateDto.UserId, configurationCreateDto.Name))
         {
-            throw new InvalidOperationException("Configuration with this name already exists for this user.");
+            logger.LogError(ConfigurationExistError);
+            return new OperationResult<ConfigurationDto>(ConfigurationExistError);
         }
 
         var configuration = new Configuration
@@ -46,7 +52,7 @@ public class ConfigurationService(
         await configurationVersionRepository.AddAsync(initialVersion);
 
         await mediator.Publish(new ConfigurationCreatedEvent(configuration.ToDto()));
-        return configuration.ToDto();
+        return new OperationResult<ConfigurationDto>(configuration.ToDto());
     }
 
     public async Task<ConfigurationDto> UpdateConfigurationAsync(Guid configurationId,
