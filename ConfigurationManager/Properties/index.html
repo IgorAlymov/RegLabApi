@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Конфигурации</title>
+</head>
+<body>
+<h1>Конфигурации</h1>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
+<script>
+  if (typeof signalR === 'undefined') {
+    alert('SignalR library not loaded!  Make sure you are serving it correctly.');
+  }
+
+  const connection = new signalR.HubConnectionBuilder()
+    .withUrl("http://localhost:5112/configurationHub")
+    .build();
+
+  connection.on("ReceiveConfigurationCreated", (configuration) => {
+    console.log("Configuration created:", configuration);
+    //  Обработать уведомление о создании конфигурации
+  });
+
+  connection.on("ReceiveConfigurationUpdated", (configuration) => {
+    console.log("Configuration updated:", configuration);
+    //  Обработать уведомление об обновлении конфигурации
+  });
+
+  connection.on("ReceiveConfigurationDeleted", (configurationId) => {
+    console.log("Configuration deleted:", configurationId);
+    //  Обработать уведомление об удалении конфигурации
+  });
+
+  connection.start()
+    .then(() => console.log("SignalR connected."))
+    .catch(err => console.error("SignalR connection error: ", err));
+</script>
+</body>
+</html>
