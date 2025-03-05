@@ -16,15 +16,4 @@ public class ConfigurationHub(ILogger<ConfigurationHub> logger) : Hub
             $"Client disconnected: {Context.ConnectionId}, Reason: {exception?.Message ?? "No reason provided"}");
         await base.OnDisconnectedAsync(exception);
     }
-
-    private Guid GetUserIdFromContext()
-    {
-        var userIdString = Context.GetHttpContext()?.Request.Query["userId"];
-        if (Guid.TryParse(userIdString, out var userId))
-        {
-            return userId;
-        }
-
-        throw new Exception("Unable to determine User ID");
-    }
 }
