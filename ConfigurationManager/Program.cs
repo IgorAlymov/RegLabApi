@@ -1,3 +1,4 @@
+using ConfigurationManager.ConfigurationManager.Application.Services;
 using ConfigurationManager.ConfigurationManager.Domain.Entities;
 using ConfigurationManager.ConfigurationManager.Infrastructure.Data;
 using ConfigurationManager.ConfigurationManager.Infrastructure.Data.Repositories;
@@ -13,6 +14,15 @@ builder.Services.AddDbContext<ConfigurationDbContext>(options =>
 
 builder.Services.AddScoped<IConfigurationRepository<Configuration>, ConfigurationRepository>();
 builder.Services.AddScoped<IRepository<ConfigurationVersion>, ConfigurationVersionRepository>();
+builder.Services.AddScoped<IConfigurationService, ConfigurationService>();
+
+builder.Services.AddSignalR();
+
+
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.WriteIndented = true;
+});
 
 var app = builder.Build();
 
@@ -23,5 +33,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRouting();
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    //endpoints.MapHub<ConfigurationHub>("/configurationHub"); // Map SignalR Hub
+});
 
 app.Run();

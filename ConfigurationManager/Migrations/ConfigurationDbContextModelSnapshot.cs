@@ -50,13 +50,10 @@ namespace ConfigurationManager.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CurrentVersionId")
-                        .IsUnique();
-
                     b.HasIndex("Name", "UserId")
                         .IsUnique();
 
-                    b.ToTable("Configurations", (string)null);
+                    b.ToTable("Configurations");
                 });
 
             modelBuilder.Entity("ConfigurationManager.ConfigurationManager.Domain.Entities.ConfigurationVersion", b =>
@@ -80,36 +77,24 @@ namespace ConfigurationManager.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ConfigurationId");
+                    b.HasIndex("ConfigurationId")
+                        .IsUnique();
 
-                    b.ToTable("ConfigurationVersions", (string)null);
-                });
-
-            modelBuilder.Entity("ConfigurationManager.ConfigurationManager.Domain.Entities.Configuration", b =>
-                {
-                    b.HasOne("ConfigurationManager.ConfigurationManager.Domain.Entities.ConfigurationVersion", "CurrentConfigurationVersion")
-                        .WithOne()
-                        .HasForeignKey("ConfigurationManager.ConfigurationManager.Domain.Entities.Configuration", "CurrentVersionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("CurrentConfigurationVersion");
+                    b.ToTable("ConfigurationVersions");
                 });
 
             modelBuilder.Entity("ConfigurationManager.ConfigurationManager.Domain.Entities.ConfigurationVersion", b =>
                 {
-                    b.HasOne("ConfigurationManager.ConfigurationManager.Domain.Entities.Configuration", "Configuration")
-                        .WithMany("ConfigurationVersions")
-                        .HasForeignKey("ConfigurationId")
+                    b.HasOne("ConfigurationManager.ConfigurationManager.Domain.Entities.Configuration", null)
+                        .WithOne("CurrentConfigurationVersion")
+                        .HasForeignKey("ConfigurationManager.ConfigurationManager.Domain.Entities.ConfigurationVersion", "ConfigurationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Configuration");
                 });
 
             modelBuilder.Entity("ConfigurationManager.ConfigurationManager.Domain.Entities.Configuration", b =>
                 {
-                    b.Navigation("ConfigurationVersions");
+                    b.Navigation("CurrentConfigurationVersion");
                 });
 #pragma warning restore 612, 618
         }

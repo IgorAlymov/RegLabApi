@@ -9,15 +9,18 @@ public class ConfigurationRepository(ConfigurationDbContext context) : IConfigur
         await context.Configurations.ToListAsync(cancellationToken: token);
 
     public async Task<Configuration?> GetByIdAsync(Guid id, CancellationToken token = default) =>
-        await context.Configurations.FindAsync([id], cancellationToken: token);
+        await context.Configurations.Include(configuration => configuration.CurrentConfigurationVersion)
+            .FirstOrDefaultAsync(c => c.Id == id, cancellationToken: token);
 
     public async Task<Configuration?> GetByIdAsync(Guid id, Guid userId) =>
-        await context.Configurations.FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
+        await context.Configurations.Include(configuration => configuration.CurrentConfigurationVersion)
+            .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
 
     public async Task<IEnumerable<Configuration>> GetAllAsync(Guid? userId = null, string? nameFilter = null,
         DateTime? createdAfter = null)
     {
-        var query = context.Configurations.AsQueryable();
+        var query = context.Configurations.Include(configuration => configuration.CurrentConfigurationVersion)
+            .AsQueryable();
         if (userId != null)
         {
             query = context.Configurations.Where(c => c.UserId == userId);

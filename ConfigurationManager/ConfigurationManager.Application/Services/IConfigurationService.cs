@@ -9,7 +9,10 @@ public interface IConfigurationService
 
     Task<ConfigurationDto?> GetConfigurationByIdAsync(Guid id);
     Task<ConfigurationDto> CreateConfigurationAsync(ConfigurationCreateDto configurationCreateDto);
-    Task<ConfigurationDto> UpdateConfigurationAsync(ConfigurationUpdateDto configurationUpdateDto);
-    Task<ConfigurationVersionDto> GetConfigurationVersionAsync(Guid configurationVersionId);
+
+    Task<ConfigurationDto>
+        UpdateConfigurationAsync(Guid configurationId, ConfigurationUpdateDto configurationUpdateDto);
+
+    Task<ConfigurationVersionDto?> GetConfigurationVersionAsync(Guid configurationId, Guid configurationVersionId);
     Task DeleteConfigurationAsync(Guid id);
 }

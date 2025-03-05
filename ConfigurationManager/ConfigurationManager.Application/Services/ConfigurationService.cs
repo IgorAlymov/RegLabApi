@@ -42,18 +42,16 @@ public class ConfigurationService(
             ConfigurationId = configuration.Id,
             Data = JsonSerializer.Serialize(configurationCreateDto.Data)
         };
-
-        configuration.ConfigurationVersions.Add(initialVersion);
         configuration.CurrentVersionId = initialVersion.Id;
-        configuration.CurrentConfigurationVersion = initialVersion;
 
         await configurationRepository.AddAsync(configuration);
+        await configurationVersionRepository.AddAsync(initialVersion);
         return configuration.ToDto();
     }
 
-    public async Task<ConfigurationDto> UpdateConfigurationAsync(ConfigurationUpdateDto configurationUpdateDto)
+    public async Task<ConfigurationDto> UpdateConfigurationAsync(Guid configurationId, ConfigurationUpdateDto configurationUpdateDto)
     {
-        var configuration = await configurationRepository.GetByIdAsync(configurationUpdateDto.Id);
+        var configuration = await configurationRepository.GetByIdAsync(configurationId);
         if (configuration == null)
         {
             throw new KeyNotFoundException("Configuration not found.");
@@ -70,7 +68,6 @@ public class ConfigurationService(
                 ConfigurationId = configuration.Id, Data = JsonSerializer.Serialize(configurationUpdateDto.Data)
             };
 
-            configuration.ConfigurationVersions.Add(newVersion);
             configuration.CurrentVersionId = newVersion.Id;
             configuration.CurrentConfigurationVersion = newVersion;
         }
@@ -79,15 +76,17 @@ public class ConfigurationService(
         return configuration.ToDto();
     }
 
-    public async Task<ConfigurationVersionDto> GetConfigurationVersionAsync(Guid configurationVersionId)
+    public async Task<ConfigurationVersionDto?> GetConfigurationVersionAsync(Guid configurationId,
+        Guid configurationVersionId)
     {
-        var version = await configurationVersionRepository.GetByIdAsync(configurationVersionId);
-        if (version == null)
+        var configuration = await configurationRepository.GetByIdAsync(configurationId);
+        if (configuration == null)
         {
-            throw new KeyNotFoundException("Configuration version not found.");
+            throw new KeyNotFoundException("Configuration not found.");
         }
 
-        return version.ToDto();
+        var version = await configurationVersionRepository.GetByIdAsync(configurationVersionId);
+        return version?.ToDto();
     }
 
     public async Task DeleteConfigurationAsync(Guid id)
